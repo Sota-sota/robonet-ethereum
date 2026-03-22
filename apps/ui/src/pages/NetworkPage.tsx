@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect, useRef } from "react";
+import { useMemo, useState, useEffect, useRef, Component, ErrorInfo, ReactNode } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import {
   Network,
@@ -11,9 +11,54 @@ import {
   Shield,
   Database,
   Star,
+  Bot,
 } from "lucide-react";
 import TopNav from "@/components/sns/TopNav";
 import ForceGraph3D from "@/components/sns/ForceGraph";
+
+/* ── WebGL Error Boundary ── */
+class WebGLErrorBoundary extends Component<{ children: ReactNode; fallback: ReactNode }, { hasError: boolean }> {
+  constructor(props: { children: ReactNode; fallback: ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+  static getDerivedStateFromError() { return { hasError: true }; }
+  componentDidCatch(error: Error, info: ErrorInfo) { console.warn("WebGL unavailable, using fallback view", error); }
+  render() { return this.state.hasError ? this.props.fallback : this.props.children; }
+}
+
+/* ── 2D Fallback Graph ── */
+const FallbackGraph = ({ robots, edges, onNodeClick }: { robots: { id: string; name: string; status: string; reputation: number }[]; edges: { source: string; target: string; type: string }[]; onNodeClick?: (id: string) => void }) => {
+  const positions = useMemo(() => {
+    const cx = 350, cy = 240, r = 160;
+    return robots.map((robot, i) => ({
+      ...robot,
+      x: cx + r * Math.cos((i / robots.length) * Math.PI * 2 - Math.PI / 2),
+      y: cy + r * Math.sin((i / robots.length) * Math.PI * 2 - Math.PI / 2),
+    }));
+  }, [robots]);
+  const posMap = Object.fromEntries(positions.map(p => [p.id, p]));
+  const statusColor: Record<string, string> = { online: "#22c55e", busy: "#f59e0b", offline: "#6b7280" };
+  const edgeColor: Record<string, string> = { subscription: "#3b82f6", absorption: "#a855f7", transaction: "#f97316" };
+
+  return (
+    <svg viewBox="0 0 700 480" className="w-full h-full" style={{ background: "#fafafa", borderRadius: "0 0 8px 8px" }}>
+      {edges.map((e, i) => {
+        const s = posMap[e.source], t = posMap[e.target];
+        if (!s || !t) return null;
+        return <line key={i} x1={s.x} y1={s.y} x2={t.x} y2={t.y} stroke={edgeColor[e.type] || "#d1d5db"} strokeWidth={1.5} strokeOpacity={0.3} />;
+      })}
+      {positions.map(p => (
+        <g key={p.id} onClick={() => onNodeClick?.(p.id)} style={{ cursor: "pointer" }}>
+          <circle cx={p.x} cy={p.y} r={20 + p.reputation * 0.15} fill={statusColor[p.status] || "#6b7280"} fillOpacity={0.15} />
+          <circle cx={p.x} cy={p.y} r={12 + p.reputation * 0.08} fill={statusColor[p.status] || "#6b7280"} />
+          <text x={p.x} y={p.y + 28} textAnchor="middle" fontSize={11} fontWeight={600} fill="#374151">{p.name}</text>
+          <text x={p.x} y={p.y + 40} textAnchor="middle" fontSize={9} fill="#9ca3af">Rep: {p.reputation}</text>
+        </g>
+      ))}
+    </svg>
+  );
+};
 
 /* ── Environment Difficulty ── */
 const ENVIRONMENTS = [
@@ -231,13 +276,21 @@ const NetworkPage = () => {
                   ))}
                 </div>
               </div>
-              <ForceGraph3D
-                nodes={graphNodes}
-                edges={EDGES}
-                width={graphSize.width}
-                height={graphSize.height}
-                onNodeClick={(id) => navigate(`/profile/${id}`)}
-              />
+              <WebGLErrorBoundary fallback={
+                <FallbackGraph
+                  robots={ROBOTS.map(r => ({ id: r.id, name: r.name, status: r.status, reputation: r.reputation }))}
+                  edges={EDGES}
+                  onNodeClick={(id) => navigate(`/profile/${id}`)}
+                />
+              }>
+                <ForceGraph3D
+                  nodes={graphNodes}
+                  edges={EDGES}
+                  width={graphSize.width}
+                  height={graphSize.height}
+                  onNodeClick={(id) => navigate(`/profile/${id}`)}
+                />
+              </WebGLErrorBoundary>
             </div>
           </div>
 
