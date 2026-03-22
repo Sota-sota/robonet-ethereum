@@ -1,0 +1,94 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 220 25% 10%;
+    --foreground: 210 20% 95%;
+
+    --card: 220 20% 14%;
+    --card-foreground: 210 20% 95%;
+
+    --popover: 220 20% 14%;
+    --popover-foreground: 210 20% 95%;
+
+    --primary: 24 95% 53%;
+    --primary-foreground: 220 25% 10%;
+
+    --secondary: 220 18% 20%;
+    --secondary-foreground: 210 20% 90%;
+
+    --muted: 220 15% 18%;
+    --muted-foreground: 215 15% 55%;
+
+    --accent: 24 95% 53%;
+    --accent-foreground: 220 25% 10%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 220 15% 22%;
+    --input: 220 15% 22%;
+    --ring: 24 95% 53%;
+
+    --radius: 0.75rem;
+
+    --sidebar-background: 220 20% 12%;
+    --sidebar-foreground: 210 20% 90%;
+    --sidebar-primary: 24 95% 53%;
+    --sidebar-primary-foreground: 220 25% 10%;
+    --sidebar-accent: 220 15% 18%;
+    --sidebar-accent-foreground: 210 20% 90%;
+    --sidebar-border: 220 15% 22%;
+    --sidebar-ring: 24 95% 53%;
+
+    --success: 142 71% 45%;
+    --success-foreground: 220 25% 10%;
+
+    --font-heading: 'Space Grotesk', sans-serif;
+    --font-body: 'Inter', sans-serif;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-body);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+  }
+}
+
+@layer utilities {
+  .gradient-orange {
+    background: linear-gradient(135deg, hsl(24, 95%, 53%), hsl(32, 100%, 60%));
+  }
+
+  .gradient-navy {
+    background: linear-gradient(180deg, hsl(220, 25%, 10%), hsl(220, 20%, 6%));
+  }
+
+  .text-gradient-orange {
+    background: linear-gradient(135deg, hsl(24, 95%, 53%), hsl(32, 100%, 60%));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .shadow-card {
+    box-shadow: 0 4px 24px -4px hsl(220 25% 5% / 0.5);
+  }
+
+  .shadow-card-hover {
+    box-shadow: 0 8px 32px -4px hsl(24 95% 53% / 0.15), 0 4px 24px -4px hsl(220 25% 5% / 0.5);
+  }
+}
